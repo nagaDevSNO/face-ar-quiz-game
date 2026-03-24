@@ -25,6 +25,48 @@ const questions = [
         left: "Yes",
         right: "No",
         correct: "left"
+    },
+    {
+        question: "Is water dry?",
+        left: "Yes",
+        right: "No",
+        correct: "right"
+    },
+    {
+        question: "Is fire cold?",
+        left: "Yes",
+        right: "No",
+        correct: "right"
+    },
+    {
+        question: "5 > 3?",
+        left: "True",
+        right: "False",
+        correct: "left"
+    },
+    {
+        question: "Sun rises in the west?",
+        left: "Yes",
+        right: "No",
+        correct: "right"
+    },
+    {
+        question: "HTML is a programming language?",
+        left: "Yes",
+        right: "No",
+        correct: "right"
+    },
+    {
+        question: "Is JavaScript used for web development?",
+        left: "Yes",
+        right: "No",
+        correct: "left"
+    },
+    {
+        question: "Is 10 less than 2?",
+        left: "Yes",
+        right: "No",
+        correct: "right"
     }
 ];
 
@@ -72,7 +114,7 @@ function selectAnswer(direction) {
             loadQuestion();
             canAnswer = true;
         } else {
-            questionEl.innerText = "Game Over!";
+            questionEl.innerText = "Game Over! Final Score: " + score + "/10";
             leftEl.innerText = "";
             rightEl.innerText = "";
         }
