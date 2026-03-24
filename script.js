@@ -1,12 +1,85 @@
+// Webcam setup
 const video = document.getElementById("video");
 
-// Start webcam
 navigator.mediaDevices.getUserMedia({ video: true })
 .then(stream => {
     video.srcObject = stream;
 });
 
-// Initialize FaceMesh
+// Quiz Data
+const questions = [
+    {
+        question: "Is the sky blue?",
+        left: "Yes",
+        right: "No",
+        correct: "left"
+    },
+    {
+        question: "2 + 2 = 5?",
+        left: "True",
+        right: "False",
+        correct: "right"
+    },
+    {
+        question: "Earth is a planet?",
+        left: "Yes",
+        right: "No",
+        correct: "left"
+    }
+];
+
+let currentQuestion = 0;
+let score = 0;
+let canAnswer = true;
+
+// UI elements
+const questionEl = document.getElementById("question");
+const leftEl = document.getElementById("left");
+const rightEl = document.getElementById("right");
+const scoreEl = document.getElementById("score");
+
+// Load question
+function loadQuestion() {
+    const q = questions[currentQuestion];
+    questionEl.innerText = q.question;
+    leftEl.innerText = q.left;
+    rightEl.innerText = q.right;
+}
+
+loadQuestion();
+
+// Handle answer
+function selectAnswer(direction) {
+    if (!canAnswer) return;
+
+    canAnswer = false;
+
+    const q = questions[currentQuestion];
+
+    if (direction === q.correct) {
+        score++;
+        console.log("Correct!");
+    } else {
+        console.log("Wrong!");
+    }
+
+    scoreEl.innerText = "Score: " + score;
+
+    setTimeout(() => {
+        currentQuestion++;
+
+        if (currentQuestion < questions.length) {
+            loadQuestion();
+            canAnswer = true;
+        } else {
+            questionEl.innerText = "Game Over!";
+            leftEl.innerText = "";
+            rightEl.innerText = "";
+        }
+    }, 1000);
+}
+
+// MediaPipe setup
 const faceMesh = new FaceMesh({
     locateFile: (file) => {
         return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
@@ -20,28 +93,29 @@ faceMesh.setOptions({
     minTrackingConfidence: 0.5
 });
 
-// Detect face movement
+let lastDirection = "center";
+
 faceMesh.onResults(results => {
     if (results.multiFaceLandmarks.length > 0) {
         const landmarks = results.multiFaceLandmarks[0];
-
-        // Nose position (important point)
         const nose = landmarks[1];
-
         const x = nose.x;
 
-        // Detect left / right movement
-        if (x < 0.4) {
-            console.log("LEFT");
-        } else if (x > 0.6) {
-            console.log("RIGHT");
-        } else {
-            console.log("CENTER");
+        let direction = "center";
+
+        if (x < 0.4) direction = "left";
+        else if (x > 0.6) direction = "right";
+
+        // Trigger only when direction changes
+        if (direction !== lastDirection && direction !== "center") {
+            selectAnswer(direction);
         }
+
+        lastDirection = direction;
     }
 });
 
-// Connect camera to face mesh
+// Camera connection
 const camera = new Camera(video, {
     onFrame: async () => {
         await faceMesh.send({ image: video });
